@@ -17,7 +17,7 @@ login(HF_TOKEN)
 app = Flask(__name__)
 
 # incase you want to upgrade to Flan-T5-XXL
-model_name = "google/flan-t5-xxl"
+# model_name = "google/flan-t5-xxl"
 # tokenizer = AutoTokenizer.from_pretrained(model_name)
 # model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
 
@@ -25,7 +25,7 @@ model_name = "google/flan-t5-xxl"
 # and use them, but "Vamsi/T5_Paraphrase_Paws" is simply preferable so yup!
 # model_name = "t5-small"
 # model_name = "t5-base"
-# model_name = "Vamsi/T5_Paraphrase_Paws"
+model_name = "Vamsi/T5_Paraphrase_Paws"
 
 
 model = T5ForConditionalGeneration.from_pretrained(model_name, token=HF_TOKEN)
