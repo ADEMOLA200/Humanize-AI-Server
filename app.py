@@ -31,6 +31,10 @@ model_name = "Vamsi/T5_Paraphrase_Paws"
 model = T5ForConditionalGeneration.from_pretrained(model_name, token=HF_TOKEN)
 tokenizer = T5Tokenizer.from_pretrained(model_name, token=HF_TOKEN)
 
+@app.route('/')
+def health_check():
+    return "Server is working! Deployment successful!"
+
 @app.route('/paraphrase', methods=['POST'])
 def paraphrase():
     text = request.json['text']
@@ -48,4 +52,5 @@ def paraphrase():
     return jsonify({'paraphrased': tokenizer.decode(outputs[0], skip_special_tokens=True)})
 
 if __name__ == '__main__':
-    app.run(port=5001)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port)
