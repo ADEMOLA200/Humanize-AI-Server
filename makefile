@@ -6,7 +6,7 @@ uvicorn-reload:
 
 # DP SK
 start-server:
-	python app.py
+	python api/index.py
 
 # Install dependencies
 requirements:

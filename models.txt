@@ -1,0 +1,5 @@
+models:
+- model_name: "Vamsi/T5_Paraphrase_Paws"
+- model_name: "t5-small"
+- model_name: "t5-base"
+- model_name: "google/flan-t5-xxl"
