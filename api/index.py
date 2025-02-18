@@ -15,8 +15,8 @@ load_dotenv()
 # HF_API_URL = "https://api-inference.huggingface.co/models/google/long-t5-tglobal-base"
 # HF_API_URL = "https://api-inference.huggingface.co/models/facebook/led-large-16384"
 # HF_API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
-HF_API_URL = "https://api-inference.huggingface.co/models/Vamsi/T5_Paraphrase_Paws"
-# HF_API_URL = "https://api-inference.huggingface.co/models/humarin/chatgpt_paraphraser_on_T5_base"
+# HF_API_URL = "https://api-inference.huggingface.co/models/Vamsi/T5_Paraphrase_Paws"
+HF_API_URL = "https://api-inference.huggingface.co/models/humarin/chatgpt_paraphraser_on_T5_base"
 HF_TOKEN = os.getenv("HF_TOKEN")
 if not HF_TOKEN:
     raise ValueError("HF_TOKEN not found in environment")
