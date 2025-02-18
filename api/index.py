@@ -12,8 +12,11 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-# we will use a model fine-tuned for paraphrasing from huggingface
-HF_API_URL = "https://api-inference.huggingface.co/models/humarin/chatgpt_paraphraser_on_T5_base"
+# HF_API_URL = "https://api-inference.huggingface.co/models/google/long-t5-tglobal-base"
+# HF_API_URL = "https://api-inference.huggingface.co/models/facebook/led-large-16384"
+# HF_API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn"
+HF_API_URL = "https://api-inference.huggingface.co/models/Vamsi/T5_Paraphrase_Paws"
+# HF_API_URL = "https://api-inference.huggingface.co/models/humarin/chatgpt_paraphraser_on_T5_base"
 HF_TOKEN = os.getenv("HF_TOKEN")
 if not HF_TOKEN:
     raise ValueError("HF_TOKEN not found in environment")
@@ -33,7 +36,7 @@ def hello():
 @app.route('/paraphrase', methods=['POST'])
 def paraphrase():
     try:
-        text = request.json.get('text', '')
+        text = request.json.get('text', '').strip()
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
@@ -42,20 +45,33 @@ def paraphrase():
             "Content-Type": "application/json"
         }
         payload = {
-            "inputs": text
+            "inputs": text,
+            "parameters": {
+                "max_length": 512,
+                "num_beams": 10,
+                "do_sample": True,
+                "temperature": 0.9, # Needs to be commented when using humarin/chatgpt_paraphraser_on_T5_base
+                "top_k": 50,
+                # "return_full_text": False
+            }
         }
 
-        response = requests.post(HF_API_URL, headers=headers, json=payload)
+        response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
         response.raise_for_status()
 
         api_response = response.json()
         logger.debug(f"Hugging Face API Response: {api_response}")
 
-        generated_text = api_response[0].get("generated_text")
+        generated_text = api_response[0].get("generated_text", "").replace("paraphrase:", "").strip()
+
         if generated_text:
             return jsonify({'paraphrased': generated_text, 'success': True})
 
         return jsonify({"error": "Unexpected response format", "response": api_response}), 500
+
+    except requests.exceptions.Timeout:
+        logger.error("Hugging Face API timed out")
+        return jsonify({"error": "Hugging Face API request timed out"}), 500
 
     except Exception as e:
         logger.error(f"Error in /paraphrase: {str(e)}")
