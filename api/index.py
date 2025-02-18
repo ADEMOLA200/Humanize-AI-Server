@@ -48,7 +48,6 @@ MODEL_DIR = "./models/t5-small"
 
 def load_model():
     global model, tokenizer
-
     # Only load if not already loaded.
     if model is None or tokenizer is None:
         local_model_dir = MODEL_DIR
@@ -57,11 +56,8 @@ def load_model():
             logger.info("Loading model from local storage...")
         else:
             logger.info("Local model not found or incomplete. Downloading from Hugging Face...")
-            # Log in using your token if necessary.
             login(HF_TOKEN)
-            # snapshot_download returns the folder where the model was downloaded.
             local_model_dir = snapshot_download(repo_id="t5-small", local_dir=MODEL_DIR)
-        
         try:
             tokenizer = T5Tokenizer.from_pretrained(local_model_dir)
             model = T5ForConditionalGeneration.from_pretrained(local_model_dir)
@@ -78,45 +74,44 @@ def health_check():
     except Exception as e:
         return f"Server operational but model failed to load: {str(e)}"
 
+@app.route('/hello')
+def hello():
+    return "Hello, Vercel deployment works!"
+
 @app.route('/paraphrase', methods=['POST'])
 def paraphrase():
     try:
         load_model()
-
         text = request.json.get('text', '')
         if not text:
             return jsonify({"error": "No text provided"}), 400
 
         inputs = tokenizer.encode("paraphrase: " + text, 
                                   return_tensors="pt", 
-                                  max_length=512,  # Reduced from 768
+                                  max_length=512,
                                   truncation=True)
-
         outputs = model.generate(
             inputs,
-            max_length=256,  # Reduced output length
-            min_length=50,   # More reasonable minimum
+            max_length=256,
+            min_length=50,
             do_sample=True,
-            num_beams=2,    # Further reduced
+            num_beams=2,
             temperature=0.7,
             top_p=0.9,
             early_stopping=True
         )
-
         return jsonify({
             'paraphrased': tokenizer.decode(outputs[0], skip_special_tokens=True),
             'success': True
         })
-
     except Exception as e:
         logger.error(f"Error in /paraphrase: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+# For local testing. Vercel will import the 'app' variable.
 if __name__ == '__main__':
     try:
         load_model()
     except Exception as e:
         logger.error(f"Failed to preload model: {str(e)}")
-
-    # Start the Flask server
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5001)))
