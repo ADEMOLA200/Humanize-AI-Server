@@ -20,11 +20,9 @@ hf_logging.set_verbosity_debug()
 load_dotenv()
 
 HF_TOKEN = os.getenv("HF_TOKEN")
-
 if not HF_TOKEN:
     raise ValueError("HF_TOKEN not found in environment")
 
-# Debug: Print first few characters of the token
 logger.info(f"Hugging Face Token (first 5 chars): {HF_TOKEN[:5]}****")
 
 app = Flask(__name__)
@@ -51,18 +49,22 @@ MODEL_DIR = "./models/t5-small"
 def load_model():
     global model, tokenizer
 
+    # Only load if not already loaded.
     if model is None or tokenizer is None:
+        local_model_dir = MODEL_DIR
+        config_file = os.path.join(local_model_dir, "config.json")
+        if os.path.exists(local_model_dir) and os.path.exists(config_file):
+            logger.info("Loading model from local storage...")
+        else:
+            logger.info("Local model not found or incomplete. Downloading from Hugging Face...")
+            # Log in using your token if necessary.
+            login(HF_TOKEN)
+            # snapshot_download returns the folder where the model was downloaded.
+            local_model_dir = snapshot_download(repo_id="t5-small", local_dir=MODEL_DIR)
+        
         try:
-            if os.path.exists(MODEL_DIR):
-                logger.info("Loading model from local storage...")
-            else:
-                logger.info("Local model not found. Downloading from Hugging Face...")
-                login(os.getenv("HF_TOKEN"))  # We authenticate with Hugging Face
-                snapshot_download(repo_id="t5-small", local_dir=MODEL_DIR)
-
-            tokenizer = T5Tokenizer.from_pretrained(MODEL_DIR)
-            model = T5ForConditionalGeneration.from_pretrained(MODEL_DIR)
-
+            tokenizer = T5Tokenizer.from_pretrained(local_model_dir)
+            model = T5ForConditionalGeneration.from_pretrained(local_model_dir)
             logger.info("Model loaded successfully!")
         except Exception as e:
             logger.error(f"Model loading failed: {str(e)}")
@@ -86,9 +88,9 @@ def paraphrase():
             return jsonify({"error": "No text provided"}), 400
 
         inputs = tokenizer.encode("paraphrase: " + text, 
-                                return_tensors="pt", 
-                                max_length=512,  # Reduced from 768
-                                truncation=True)
+                                  return_tensors="pt", 
+                                  max_length=512,  # Reduced from 768
+                                  truncation=True)
 
         outputs = model.generate(
             inputs,
