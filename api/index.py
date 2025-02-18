@@ -50,7 +50,7 @@ def paraphrase():
                 "max_length": 512,
                 "num_beams": 10,
                 "do_sample": True,
-                "temperature": 0.9, # Needs to be commented when using humarin/chatgpt_paraphraser_on_T5_base
+                # "temperature": 0.9, # Needs to be commented when using humarin/chatgpt_paraphraser_on_T5_base
                 "top_k": 50,
                 # "return_full_text": False
             }
