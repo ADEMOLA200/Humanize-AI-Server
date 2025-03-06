@@ -4,6 +4,8 @@
 
 > **Note**: This project is still under active development and not all features are finalized.
 
+> **Note**: Visit the frontend site with the link https://humanize-ai-frontend.vercel.app
+
 ---
 
 ## Project Structure
@@ -59,7 +61,7 @@
 
 1. **Clone the repository**  
    ```bash
-   git clone https://github.com/YOUR_USERNAME/Humanize-AI-Server.git
+   git clone https://github.com/ADEMOLA200/Humanize-AI-Server.git
    cd Humanize-AI-Server/api
    ```
 
